@@ -3,6 +3,7 @@
 #include "PandaControlLoop.h"
 
 #include <mc_panda/devices/Pump.h>
+#include <mc_panda/devices/Hand.h>
 #include <mc_panda/devices/Robot.h>
 
 #include <boost/program_options.hpp>
@@ -79,13 +80,18 @@ void * global_thread_init(mc_control::MCGlobalController::GlobalConfiguration & 
             pandas_init_cv.wait(lock, [&pandas_init_ready]() { return pandas_init_ready; });
           }
           auto pump = mc_panda::Pump::get(robot);
+          auto  hand = mc_panda::Hand::get(robot);
           auto & device = *mc_panda::Robot::get(robot);
           auto panda = std::unique_ptr<PandaControlLoop<cm, ShowNetworkWarnings>>(
-              new PandaControlLoop<cm, ShowNetworkWarnings>(robot.name(), ip, n_steps, device, pump));
+              new PandaControlLoop<cm, ShowNetworkWarnings>(robot.name(), ip, n_steps, device, pump, hand));
           device.addToLogger(controller.controller().logger(), robot.name());
           if(pump)
           {
             pump->addToLogger(controller.controller().logger(), robot.name());
+          }
+          if(hand)
+          {
+            hand->addToLogger(controller.controller().logger(), robot.name());
           }
           std::unique_lock<std::mutex> lock(pandas_init_mutex);
           pandas.emplace_back(std::move(panda));
