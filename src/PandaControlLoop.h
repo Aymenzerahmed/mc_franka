@@ -112,9 +112,10 @@ PandaControlLoop<cm, ShowNetworkWarnings>::PandaControlLoop(const std::string & 
                                                             mc_panda::Robot & device,
                                                             mc_panda::Pump * pump,
                                                             mc_panda::Hand * hand)
-: name_(name), robot_(ip, franka::RealtimeConfig::kIgnore), state_(robot_.readOnce()), control_(state_), device_(device), steps_(steps),
-  logger_(mc_rtc::Logger::Policy::THREADED, "/tmp", "mc-franka-" + name_)
+: name_(name), robot_(ip, franka::RealtimeConfig::kIgnore), state_(robot_.readOnce()), control_(state_),
+  device_(device), steps_(steps), logger_(mc_rtc::Logger::Policy::THREADED, "/tmp", "mc-franka-" + name_)
 {
+  robot_.automaticErrorRecovery();
   static auto panda_init_t = clock::now();
   auto now = clock::now();
   duration_us dt = now - panda_init_t;
