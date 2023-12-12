@@ -133,7 +133,12 @@ PandaControlLoop<cm, ShowNetworkWarnings>::PandaControlLoop(const std::string & 
     sensorsBuffer_.resize(9,0);
   }
   
-  device.connect(&robot_);
+  device.connect(&robot_);  
+  robot_.setCollisionBehavior(std::array<double, 7>{-87, -87, -87, -87, -11, -11, -11},
+                              std::array<double, 7>{87, 87, 87, 87, 11, 11, 11},
+                              std::array<double, 6>{-100, -100, -100, -100, -100, -100},
+                              std::array<double, 6>{100, 100, 100, 100, 100, 100});
+
   device.addToLogger(logger_, name);
 }
 
@@ -174,7 +179,7 @@ template<ControlMode cm, bool ShowNetworkWarnings>
 void PandaControlLoop<cm, ShowNetworkWarnings>::updateSensors(mc_control::MCGlobalController & controller)
 {
   std::unique_lock<std::mutex> lock(updateSensorsMutex_);
-  auto & robot = controller.controller().robots().robot(name_);
+  auto & robot = controller.controller().outputRobots().robot(name_);
   auto  hand = mc_panda::Hand::get(robot);
   // auto hand= HandObj->get(robot);
   using GC = mc_control::MCGlobalController;
